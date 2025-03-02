@@ -45,7 +45,7 @@ jobs:
                 docker run -d \
                   --name mysql-db \
                   --network app_network \
-                  -e MYSQL_ROOT_PASSWORD=rootpassword \
+                  -e MYSQL_ROOT_PASSWORD=root \
                   -e MYSQL_DATABASE=attendance_db \
                   -p 3306:3306 \
                   mysql:latest
@@ -89,7 +89,7 @@ jobs:
               -p \$IDLE_PORT:5000 \
               -e DB_HOST=mysql-db \
               -e DB_USER=root \
-              -e DB_PASSWORD=rootpassword \
+              -e DB_PASSWORD=root \
               -e DB_NAME=attendance_db \
               ${{ secrets.DOCKER_USERNAME }}/flask-attendance-app
 
