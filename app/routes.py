@@ -6,7 +6,7 @@ from datetime import date, datetime
 
 @app.route('/')
 def home():
-    return 'Hello, Flask App Running!', 200
+    return render_template("index.html")
 
 @app.route('/healthcheck')
 def healthcheck():
