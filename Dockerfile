@@ -14,7 +14,7 @@ COPY . .
 ENV PYTHONPATH=/app
 ENV FLASK_ENV=test
 
-CMD ["python", "-m", "unittest", "tests.test_routes", "tests.test_healthcheck"]
+CMD ["python", "-m", "unittest", "tests.test_rout", "tests.test_healthche"]
 
 # Stage 3: Production Stage
 FROM python:3.9-slim AS production
