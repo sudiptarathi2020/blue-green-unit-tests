@@ -11,14 +11,13 @@ WORKDIR /app
 
 COPY . .
 
-# Ensure Python sees /app as the project root
+# Set Python Path so /app is root and "tests" is importable
 ENV PYTHONPATH=/app
 
-# Run individual test modules explicitly (avoid "discover")
+# Run specific test files (not using "discover")
 CMD ["python", "-m", "unittest", "tests.test_routes", "tests.test_healthcheck"]
-# Alternatively: you can add all test files here
 
-# Stage 3: Production Stage (Final App Image)
+# Stage 3: Production Stage
 FROM python:3.9-slim AS production
 WORKDIR /app
 
@@ -28,3 +27,4 @@ COPY . .
 EXPOSE 5000
 
 CMD ["python", "run.py"]
+
