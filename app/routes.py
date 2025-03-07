@@ -7,6 +7,10 @@ from datetime import date, datetime
 def home():
     return render_template("index.html")
 
+@app.route('/healthcheck')
+def healthcheck():
+    return jsonify({'status': 'ok'}), 200
+
 @app.route('/register_student', methods=['POST'])
 def register_student():
     data = request.get_json()
