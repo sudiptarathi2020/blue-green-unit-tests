@@ -3,9 +3,14 @@ from app import app
 from app.models import add_student, mark_attendance, get_attendance, get_attendance_stats, get_student_attendance
 from datetime import date, datetime
 
+
 @app.route('/')
 def home():
-    return render_template("index.html")
+    return 'Hello, Flask App Running!', 200
+
+@app.route('/healthcheck')
+def healthcheck():
+    return jsonify({'status': 'ok'}), 200
 
 @app.route('/register_student', methods=['POST'])
 def register_student():
