@@ -26,7 +26,7 @@ jobs:
       - name: Run Tests inside Docker
         run: |
           docker run --rm flask-attendance-tester
-          
+
       - name: Build and Push Final Image (only if tests pass)
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/flask-attendance-app .

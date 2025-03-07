@@ -3,14 +3,9 @@ from app import app
 from app.models import add_student, mark_attendance, get_attendance, get_attendance_stats, get_student_attendance
 from datetime import date, datetime
 
-
 @app.route('/')
 def home():
     return render_template("index.html")
-
-@app.route('/healthcheck')
-def healthcheck():
-    return jsonify({'status': 'ok'}), 200
 
 @app.route('/register_student', methods=['POST'])
 def register_student():
@@ -58,3 +53,4 @@ def attendance_stats():
         stats = get_attendance_stats(start_date, end_date)
 
     return jsonify(stats)
+
