@@ -1,33 +1,28 @@
-# Stage 1: Build Stage - Install Dependencies
+# Stage 1: Build Stage (Install Dependencies)
 FROM python:3.9 AS builder
 WORKDIR /app
 
-# Install dependencies in a temporary layer
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Stage 2: Test Stage (Optional Test Runner Stage)
+# Stage 2: Test Stage (optional)
 FROM builder AS tester
 WORKDIR /app
 
-# Copy the full app including test files
-COPY . /app
+# Copy all app files (including tests directory)
+COPY . .
 
-# Run tests (this is where your test command goes)
+# Run tests
 CMD ["python", "-m", "unittest", "discover", "-s", "tests"]
+# ^ This will now correctly find /app/tests inside the container
 
-# Stage 3: Final Production Stage - Slim Image for Running the App
+# Stage 3: Production Stage
 FROM python:3.9-slim AS production
 WORKDIR /app
 
-# Copy pre-installed packages from builder
 COPY --from=builder /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
-# Copy app files
-COPY . /app
+COPY . .
 
-# Expose Flask Port
 EXPOSE 5000
-
-# Default start command for production
 CMD ["python", "run.py"]
 
