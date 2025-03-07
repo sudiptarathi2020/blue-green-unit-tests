@@ -5,16 +5,15 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Stage 2: Test Stage (Runs Tests Inside Docker)
+# Stage 2: Test Stage (with FLASK_ENV=test)
 FROM builder AS tester
 WORKDIR /app
 
 COPY . .
 
-# Set Python Path so /app is root and "tests" is importable
 ENV PYTHONPATH=/app
+ENV FLASK_ENV=test
 
-# Run specific test files (not using "discover")
 CMD ["python", "-m", "unittest", "tests.test_routes", "tests.test_healthcheck"]
 
 # Stage 3: Production Stage

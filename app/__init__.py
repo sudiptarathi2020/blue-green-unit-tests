@@ -1,9 +1,14 @@
+import os
 from flask import Flask
-from app.database import init_db
 
 app = Flask(__name__)
 
-# Initialize database on startup
-init_db()
+if os.getenv('FLASK_ENV') == 'test':
+    app.config.from_object('app.config_test')
+else:
+    app.config.from_object('app.config')
 
-from app import routes  # Import routes after app initialization
+from app import routes
+
+
+
