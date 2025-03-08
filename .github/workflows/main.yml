@@ -50,13 +50,7 @@ jobs:
             docker network create app_network || true
 
             if ! docker ps --filter "name=mysql-db" | grep mysql-db; then
-              docker run -d \
-                --name mysql-db \
-                --network app_network \
-                -e MYSQL_ROOT_PASSWORD=root \
-                -e MYSQL_DATABASE=attendance_db \
-                -p 3306:3306 \
-                mysql:latest
+              docker run -d                 --name mysql-db                 --network app_network                 -e MYSQL_ROOT_PASSWORD=root                 -e MYSQL_DATABASE=attendance_db                 -p 3306:3306                 mysql:latest
               sleep 30
             fi
 
@@ -94,44 +88,35 @@ jobs:
             docker stop flask-app-\$IDLE_COLOR || true
             docker rm flask-app-\$IDLE_COLOR || true
 
-            docker run -d \
-              --name flask-app-\$IDLE_COLOR \
-              --network app_network \
-              -p \$IDLE_PORT:5000 \
-              -e DB_HOST=mysql-db \
-              -e DB_USER=root \
-              -e DB_PASSWORD=root \
-              -e DB_NAME=attendance_db \
-              ${{ secrets.DOCKER_USERNAME }}/flask-attendance-app
+            docker run -d               --name flask-app-\$IDLE_COLOR               --network app_network               -p \$IDLE_PORT:5000               -e DB_HOST=mysql-db               -e DB_USER=root               -e DB_PASSWORD=root               -e DB_NAME=attendance_db               ${{ secrets.DOCKER_USERNAME }}/flask-attendance-app
 
             echo "Successfully deployed to \$IDLE_COLOR"
 
-            # Dynamically write nginx conf instead of trying to edit it
-            echo "Updating nginx configuration"
-
+            # Correctly generate the new NGINX configuration
             cat <<EOF_NGINX | sudo tee /etc/nginx/conf.d/bluegreen.conf
-            upstream flask_app {
-                server localhost:\$IDLE_PORT;
-            }
+upstream flask_app {
+    server localhost:\$IDLE_PORT;
+}
 
-            server {
-                listen 80;
+server {
+    listen 80;
 
-                location / {
-                    proxy_pass http://flask_app;
-                    proxy_set_header Host \$host;
-                    proxy_set_header X-Real-IP \$remote_addr;
-                }
-            }
-            EOF_NGINX
+    location / {
+        proxy_pass http://flask_app;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+    }
+}
+EOF_NGINX
 
-              sudo nginx -s reload
-              echo "Traffic switched to \$IDLE_COLOR"
+            sudo nginx -s reload
+            echo "Traffic switched to \$IDLE_COLOR"
 
-              if [ "\$ACTIVE_COLOR" != "none" ]; then
-                  docker stop flask-app-\$ACTIVE_COLOR || true
-                  docker rm flask-app-\$ACTIVE_COLOR || true
-                  echo "Removed old \$ACTIVE_COLOR container"
-              fi
+            # Stop and remove the old container
+            if [ "\$ACTIVE_COLOR" != "none" ]; then
+                docker stop flask-app-\$ACTIVE_COLOR || true
+                docker rm flask-app-\$ACTIVE_COLOR || true
+                echo "Removed old \$ACTIVE_COLOR container"
+            fi
 
           EOF
