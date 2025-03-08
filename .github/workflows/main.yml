@@ -78,7 +78,7 @@ jobs:
             echo "Deploying to: \$IDLE_COLOR (port \$IDLE_PORT)"
 
             if [ -z "\$IDLE_PORT" ]; then
-              echo "🚨 ERROR: IDLE_PORT is not set correctly!"
+              echo "ERROR: IDLE_PORT is not set correctly!"
               exit 1
             fi
 
@@ -87,15 +87,28 @@ jobs:
 
             docker stop flask-app-\$IDLE_COLOR || true
             docker rm flask-app-\$IDLE_COLOR || true
+            
+            if [ -z "$IDLE_PORT" ]; then
+                echo "ERROR: IDLE_PORT is not set correctly!"
+                exit 1
+            fi
 
-            docker run -d               --name flask-app-\$IDLE_COLOR               --network app_network               -p \$IDLE_PORT:5000               -e DB_HOST=mysql-db               -e DB_USER=root               -e DB_PASSWORD=root               -e DB_NAME=attendance_db               ${{ secrets.DOCKER_USERNAME }}/flask-attendance-app
+            docker run -d \
+              --name flask-app-$IDLE_COLOR \
+              --network app_network \
+              -p $IDLE_PORT:5000 \
+              -e DB_HOST=mysql-db \
+              -e DB_USER=root \
+              -e DB_PASSWORD=root \
+              -e DB_NAME=attendance_db \
+              ${{ secrets.DOCKER_USERNAME }}/flask-attendance-app
 
             echo "Successfully deployed to \$IDLE_COLOR"
 
             # Correctly generate the new NGINX configuration
             cat <<EOF_NGINX | sudo tee /etc/nginx/conf.d/bluegreen.conf
             upstream flask_app {
-                server localhost:\$IDLE_PORT;
+                server localhost:$IDLE_PORT;
             }
 
             server {
@@ -109,14 +122,14 @@ jobs:
             }
             EOF_NGINX
 
-                        sudo nginx -s reload
-                        echo "Traffic switched to \$IDLE_COLOR"
+            sudo nginx -s reload
+            echo "Traffic switched to \$IDLE_COLOR"
 
-                        # Stop and remove the old container
-                        if [ "\$ACTIVE_COLOR" != "none" ]; then
-                            docker stop flask-app-\$ACTIVE_COLOR || true
-                            docker rm flask-app-\$ACTIVE_COLOR || true
-                            echo "Removed old \$ACTIVE_COLOR container"
-                        fi
+            # Stop and remove the old container
+            if [ "\$ACTIVE_COLOR" != "none" ]; then
+                docker stop flask-app-\$ACTIVE_COLOR || true
+                docker rm flask-app-\$ACTIVE_COLOR || true
+                echo "Removed old \$ACTIVE_COLOR container"
+            fi
 
-                      EOF
+          EOF
