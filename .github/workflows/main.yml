@@ -94,29 +94,29 @@ jobs:
 
             # Correctly generate the new NGINX configuration
             cat <<EOF_NGINX | sudo tee /etc/nginx/conf.d/bluegreen.conf
-upstream flask_app {
-    server localhost:\$IDLE_PORT;
-}
+            upstream flask_app {
+                server localhost:\$IDLE_PORT;
+            }
 
-server {
-    listen 80;
+            server {
+                listen 80;
 
-    location / {
-        proxy_pass http://flask_app;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-    }
-}
-EOF_NGINX
+                location / {
+                    proxy_pass http://flask_app;
+                    proxy_set_header Host \$host;
+                    proxy_set_header X-Real-IP \$remote_addr;
+                }
+            }
+            EOF_NGINX
 
-            sudo nginx -s reload
-            echo "Traffic switched to \$IDLE_COLOR"
+                        sudo nginx -s reload
+                        echo "Traffic switched to \$IDLE_COLOR"
 
-            # Stop and remove the old container
-            if [ "\$ACTIVE_COLOR" != "none" ]; then
-                docker stop flask-app-\$ACTIVE_COLOR || true
-                docker rm flask-app-\$ACTIVE_COLOR || true
-                echo "Removed old \$ACTIVE_COLOR container"
-            fi
+                        # Stop and remove the old container
+                        if [ "\$ACTIVE_COLOR" != "none" ]; then
+                            docker stop flask-app-\$ACTIVE_COLOR || true
+                            docker rm flask-app-\$ACTIVE_COLOR || true
+                            echo "Removed old \$ACTIVE_COLOR container"
+                        fi
 
-          EOF
+                      EOF
